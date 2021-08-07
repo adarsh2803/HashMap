@@ -1,0 +1,102 @@
+//HashMap Implementation
+//Hashmap --> O(1) -> search , add , Delete
+//Have following Function ->
+// containsKey ,get, remove ,size ,keySet
+
+#include<bits/stdc++.h> 
+using namespace std; 
+
+class HashMap{
+  public:
+    vector<vector<array<int,2>>>bucket;
+    int n;
+    HashMap(){
+        bucket.resize(4);
+        n=0;
+    }
+    
+    int hashfn(int key){
+        hash<string>v;
+        return v(to_string(key))%bucket.size();
+    }
+    int wbi(int bi,int key){//within bucket index
+        for(int i=0;i<bucket[bi].size();i++){
+            if(bucket[bi][i][0]==key)return i;
+        }
+        return -1;
+    }
+    void rehash(){
+        vector<vector<array<int,2>>>old=bucket;
+        bucket.clear();
+        bucket.resize(old.size()*2);
+        n=0;
+        for(int i=0;i<old.size();i++){
+            for(int j=0;j<old[i].size();j++)put(old[i][j][0],old[i][j][1]);
+        }
+    }
+    
+    void put(int key,int val){
+        int bi=hashfn(key);
+        int di=wbi(bi,key);
+        if(di==-1)n++,bucket[bi].push_back({key,val});
+        else bucket[bi][di][1]=val;
+        
+        double lambda=n*1.0/bucket.size();
+        if(lambda>2)rehash();
+    }
+    
+    int containsKey(int key){
+        int bi=hashfn(key);
+        int di=wbi(bi,key);
+        if(di!=-1)return 1;
+        else return 0;
+    }
+    
+    int get(int key){
+        int bi=hashfn(key);
+        int di=wbi(bi,key);
+        if(di==-1)return INT_MAX;
+        else return bucket[bi][di][1];
+    }
+    
+    int remove(int key){
+        int bi=hashfn(key);
+        int di=wbi(bi,key);
+        if(di==-1)return INT_MAX;
+        else{
+            n--;
+            int val=bucket[bi][di][1];
+            bucket[bi].erase(bucket[bi].begin()+di);
+            return val;
+        }
+    }
+    int size(){
+        return n;
+    }
+    vector<int> keySet(){
+        vector<int>ans;
+        for(int i=0;i<bucket.size();i++){
+            for(int j=0;j<bucket[i].size();j++)ans.push_back(bucket[i][j][0]);
+        }
+        return ans;
+    }
+};
+
+int main(){
+    HashMap h;
+    int a[10]={10,20,30,40,50,60,70,80,90,100};
+    for(int i=0;i<10;i++)h.put(i,a[i]);
+        
+    vector<int>v=h.keySet();
+    for(auto &x:v)cout<<x<<" ";cout<<endl;
+    
+    cout<<h.size()<<endl;
+    cout<<h.containsKey(1)<<endl;
+    cout<<h.containsKey(12)<<endl;
+    cout<<h.get(3)<<endl;
+    
+    h.remove(1);
+    v=h.keySet();
+    for(auto &x:v)cout<<x<<" ";
+    return 0;
+}
